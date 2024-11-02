@@ -178,7 +178,7 @@ def stack_smat(ds, ns, wl, theta_0, pol="s"):
         connections[f'if_{i},right'] = f'prop_{i},left'
         connections[f'prop_{i},right'] = f'if_{i+1},left'
 
-    settings = dict(ni=ns[i+1], nj=ns[i+2], wl=wl, theta_0=theta_0)
+    settings = dict(ni=ns[i+1], nj=ns[i+2], wl=wl, theta_0=theta_0, pol=pol)
     instances[f'if_{i+1}'] = {'component': "if", 'settings': settings}
     ports = {"in": "if_0,left", "out": f"if_{len(ds)},right"}
 
@@ -196,7 +196,6 @@ def stack_smat(ds, ns, wl, theta_0, pol="s"):
 
 def stack_smat_kx(ds, ns, k0, kx, pol="s", fresnel=fresnel_kx):
     ns = [1]+ns+[1]
-    print(f"ns: {ns}")
     instances = {}
     connections = {}
     models = {
@@ -223,8 +222,7 @@ def stack_smat_kx(ds, ns, k0, kx, pol="s", fresnel=fresnel_kx):
         "connections": connections,
         "ports": ports
     }
-    from pprint import pprint
-    pprint(netlist)
+
     return sax.circuit(
         netlist = netlist,
         models = models,
