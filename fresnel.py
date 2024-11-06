@@ -2,11 +2,13 @@ import jax.numpy as jnp
 from propagation import angled_sqrt
 
 def fresnel_kx_direct(
-    ni=1, nj=1, k0=1, kx=0, pol="p", bc_angle=jnp.pi, **kwargs
+    ni=1, nj=1, k0=1, kx=0, pol="p", 
+    bc_angle_i=jnp.pi/2, bc_angle_j=jnp.pi/2,
+    **kwargs
 ):
 
-    kiz = -angled_sqrt((k0*ni)**2 - kx**2 + 0j, bc_angle)
-    kjz = angled_sqrt((k0*nj)**2 - kx**2 + 0j, bc_angle)
+    kiz = -angled_sqrt((k0*ni)**2 - kx**2 + 0j, bc_angle_i)
+    kjz = angled_sqrt((k0*nj)**2 - kx**2 + 0j, bc_angle_j)
 
     # print(f"{kiz=}; {kjz=}")
     if pol in ["s", "TE"]:
