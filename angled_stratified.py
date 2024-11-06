@@ -3,7 +3,6 @@ from propagation import propagation_kx
 import sax
 
 def stack_smat_kx(ds, ns, k0, kx, pol="s"):
-    ns = [1]+ns+[1]
     instances = {}
     connections = {}
     models = {

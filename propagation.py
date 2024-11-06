@@ -13,7 +13,7 @@ def propagation_i(ni=1, di=1, wl=1, theta_0=0, **kwargs):
     kx = k0 * jnp.sin(theta_0)
     return propagation_kx(ni, di, k0, kx)
 
-def angled_sqrt(x, bc_angle=jnp.pi, nan_tolerance=0.01*jnp.pi): #0):#
+def angled_sqrt(x, bc_angle=jnp.pi, nan_tolerance=0):# 0.01*jnp.pi):
     arg = (bc_angle-jnp.pi)
     adjusted_angle = jnp.angle(x*jnp.exp(1j*arg))
 
