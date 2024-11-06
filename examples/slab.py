@@ -40,7 +40,7 @@ if __name__ == "__main__":
     SAMPLE_REAL = False #False
     num_samples = 300
 
-    ext = 0.6
+    ext = 0.6 * 4
     ixt = -2
     res = 200
     k_r = jnp.concat([
@@ -101,8 +101,8 @@ if __name__ == "__main__":
         [ jnp.pi/2,      jnp.pi/2]
     ]
    # bcs = [-jnp.pi*3/2, jnp.pi/2]
-    kt_cum = []
-    tr_cum = []
+    kt_cum = jnp.array([])
+    tr_cum = jnp.array([])
     for i, bc_pair in enumerate(bc_pairs):
         #plt.figure()
         settings = sax.get_settings(stack)
@@ -156,6 +156,9 @@ if __name__ == "__main__":
             kt = kt[filt]
             tr = tr[filt]
 
+            kt_cum = jnp.concat([kt_cum, kt])
+            tr_cum = jnp.concat([tr_cum, tr])
+
             try:
                 z_j, f_j, w_j, z_n = aaa(
                     kt, 
@@ -189,8 +192,18 @@ if __name__ == "__main__":
             plt.grid()
             
             color=f"C{i}"
-            plt.scatter(z_n.real, z_n.imag, zorder=5, marker="x", color=color)
-            plt.scatter(kt.real, kt.imag, zorder=5, marker=".", color=color)
+            # plt.scatter(z_n.real, z_n.imag, zorder=5, marker="x", color=color)
+            # plt.scatter(kt.real, kt.imag, zorder=5, marker=".", color=color)
+
+    try:
+        z_j, f_j, w_j, z_n = aaa(
+            kt_cum, 
+            tr_cum, 
+            tol=1e-7
+        )
+        plt.scatter(z_n.real, z_n.imag, zorder=5, marker="x", color="k")
+    except LinAlgError:
+        pass
 
     for ax in axs.flatten():
         ext_x = 5
