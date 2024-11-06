@@ -25,9 +25,9 @@ def pcolormesh_k(K_r, K_i, val, **kwargs):
 
 if __name__ == "__main__":
     to_Hz = 300e12/(2*jnp.pi)
-    f_domain=jnp.array([7.5-30j, 10.5+0.2j])*to_Hz
+    #f_domain=jnp.array([7.5-30j, 10.5+0.2j])*to_Hz
     #f_domain=jnp.array([7.5-0.3j, 10.5+0.03j])*to_Hz
-    #f_domain=jnp.array([7.5-0.1j, 10.5+0.01j]) *to_Hz
+    f_domain=jnp.array([7.5-0.1j, 10.5+0.01j]) *to_Hz
     k_domain=f_to_k(f_domain)
 
     pol = "s"
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     K_r, K_i = jnp.meshgrid(k_r, k_i)
 
     t_layer = jnp.ones(9)*0.3e-6 # jnp.linspace(0.01, 0.09, 9)*1e-6
-    kx = jnp.linspace(0.5, 2, 9) * max(k_domain.real)
+    kx = jnp.linspace(0, 2, 9) * max(k_domain.real)
     k0_mesh = K_r+ 1j*K_i
 
     k0_mesh = k0_mesh[None, :]
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         #     tol=1e-7
         # )
         trans = jnp.abs(smat_mesh[('in', 'out')][idx])
-        pcolormesh_k(K_r, K_i, trans, norm="log", vmin=1e-3, vmax=jnp.quantile(trans, 0.99))
+        pcolormesh_k(K_r, K_i, trans, norm="log", vmin=1e-3, vmax=jnp.nanquantile(trans, 0.99))
         plt.colorbar()
         plt.xlim(plt.xlim())
         plt.ylim(plt.ylim())
