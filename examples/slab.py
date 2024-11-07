@@ -11,21 +11,21 @@ import numpy as onp
 from numpy.linalg import LinAlgError
 import sax
 
-def tildify(k, Cs, bcs):
+def tildify(k, Cs, bcs, nan_tolerance=0):
     return 1/len(Cs)*jnp.sum(jnp.array([
         angled_sqrt(
             (jnp.squeeze(k)**2 - jnp.squeeze(C)**2), 
             bc_angle=bc, 
-            nan_tolerance=0) for C, bc in zip(Cs, bcs)
+            nan_tolerance=nan_tolerance) for C, bc in zip(Cs, bcs)
     ]), axis=0)
 
-def tildify_kx(k, ns, kx, bcs):
-    return 1/len(ns)*jnp.sum(jnp.array([
-        angled_sqrt(
-            ((jnp.squeeze(k)*n)**2 - jnp.squeeze(kx)**2), 
-            bc_angle=bc, 
-            nan_tolerance=0) for n, bc in zip(ns, bcs)
-    ]), axis=0)
+# def tildify_kx(k, ns, kx, bcs):
+#     return 1/len(ns)*jnp.sum(jnp.array([
+#         angled_sqrt(
+#             ((jnp.squeeze(k)*n)**2 - jnp.squeeze(kx)**2), 
+#             bc_angle=bc, 
+#             nan_tolerance=0) for n, bc in zip(ns, bcs)
+#     ]), axis=0)
 
 if __name__ == "__main__":
 
@@ -36,13 +36,13 @@ if __name__ == "__main__":
     n_sup = 1
     n_wg = 4
 
-    TILDE = True #False
-    SAMPLE_REAL = False #False
+    TILDE = True
+    SAMPLE_REAL = False
     num_samples = 300
 
-    ext = 0.6 * 4
+    ext = 0.6*2
     ixt = -2
-    res = 200
+    res = 120
     k_r = jnp.concat([
         kx/n_sup-jnp.logspace(ext, ixt, res), kx/n_sup+jnp.logspace(ixt, ext, res),
         kx/n_sub-jnp.logspace(ext, ixt, res), kx/n_sub+jnp.logspace(ixt, ext, res),
@@ -51,10 +51,17 @@ if __name__ == "__main__":
 
     k_r = jnp.sort(jnp.concat([k_r, -k_r]))
 
-    res = 200
     k_i = jnp.concat([
         -jnp.logspace(ext, ixt, res), jnp.logspace(ixt, ext, res)
     ])
+
+    borders = [
+        k_r     + 1j*min(k_i),
+        k_r     + 1j*max(k_i),
+        min(k_r)+ 1j*k_i,
+        max(k_r)+ 1j*k_i,
+    ]
+
     #k_i = jnp.linspace(-20, 6, 60)
 
     if SAMPLE_REAL:
@@ -136,6 +143,18 @@ if __name__ == "__main__":
 
             K_tilde = tildify(k0_mesh, branchpoints, bcs=bc_pair) 
             k_r_tilde = tildify(k_r, branchpoints, bcs=bc_pair)
+
+            for k_border in borders:
+                k_tilde_border = tildify(
+                    k_border, branchpoints, 
+                    bcs=bc_pair, nan_tolerance=1e-1
+                )
+
+                plt.plot(
+                    k_tilde_border.real, 
+                    k_tilde_border.imag, 
+                    color="k", zorder=6
+                )
             
             if TILDE:
                 if SAMPLE_REAL:
@@ -177,13 +196,21 @@ if __name__ == "__main__":
                 #         vmin=1e-3
                 # )
 
-                plt.scatter(
-                        K_tilde.real.flatten(), K_tilde.imag.flatten(), 
-                        c = jnp.abs(trans), 
+                plt.tripcolor(
+                        K_tilde.real.flatten(), 
+                        K_tilde.imag.flatten(), 
+                        jnp.abs(trans).flatten(), 
                         norm="log", 
                         vmax=1e2, 
-                        vmin=1e-3
-                )
+                        vmin=1e-3)
+                
+                # plt.scatter(
+                #         K_tilde.real.flatten(), K_tilde.imag.flatten(), 
+                #         c = jnp.abs(trans), 
+                #         norm="log", 
+                #         vmax=1e2, 
+                #         vmin=1e-3
+                # )
             else: 
                 plt.pcolormesh(K_r, K_i, jnp.abs(trans), norm="log", vmin=1e-3, vmax=3)
             
